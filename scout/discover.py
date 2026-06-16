@@ -95,6 +95,9 @@ def discover(client, *, search: dict) -> list[Role]:
     Role. Raises DiscoverError on any parse failure.
     """
     prompt = build_prompt(search)
-    raw = client.complete(prompt, web=True)
+    # Web-enabled discovery makes many search round-trips, so it needs a far
+    # longer ceiling than the 120s default. Configurable via search.discover_timeout.
+    timeout = int(search.get("discover_timeout", 600))
+    raw = client.complete(prompt, web=True, timeout=timeout)
     candidates = _extract_json_array(raw)
     return [_to_role(item) for item in candidates if isinstance(item, dict)]
