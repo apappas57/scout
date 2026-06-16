@@ -1,0 +1,34 @@
+[
+  {
+    "company": "Acme AI",
+    "title": "Forward Deployed Engineer",
+    "url": "https://boards.example.com/acme-ai/jobs/1001",
+    "location": "Remote AU",
+    "source": "greenhouse",
+    "snippet": "Partner with strategic customers to ship applied AI integrations. Remote across Australia."
+  },
+  {
+    "company": "Beacon Labs",
+    "title": "Applied AI Engineer",
+    "url": "https://jobs.example.com/beacon/2002",
+    "location": "Sydney",
+    "source": "lever",
+    "snippet": "Build applied AI features alongside founding engineers. Sydney office, hybrid."
+  },
+  {
+    "company": "Northwind Systems",
+    "title": "Solutions Engineer Internship",
+    "url": "https://careers.example.com/northwind/3003",
+    "location": "Remote",
+    "source": "ashby",
+    "snippet": "Unpaid internship supporting the solutions engineering team. Remote."
+  },
+  {
+    "company": "Delta Forge",
+    "title": "Senior Solutions Architect, AI",
+    "url": "https://boards.example.com/delta-forge/jobs/4004",
+    "location": "Melbourne",
+    "source": "greenhouse",
+    "snippet": "Lead technical pre-sales and deployment for AI platform customers. Melbourne or remote."
+  }
+]
