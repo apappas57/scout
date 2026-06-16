@@ -1,0 +1,34 @@
+enabled = true
+
+[profile]
+name = "Your Name"
+headline = "Applied-AI / Forward-Deployed Engineer"
+summary = "One-paragraph positioning used in scoring and drafts."
+calibration = "Notes on what HIGH vs MED looks like for you."
+
+[paths]
+db = "scout.db"
+cv = "~/Desktop/resumes/cv.pdf"
+legacy_tracker = "~/Desktop/resumes/Job_Application_Tracker.md"
+digests_dir = "digests"
+heartbeat = "state/heartbeat"
+
+[search]
+target_companies = ["Anthropic", "OpenAI", "Glean", "Canva", "Cresta"]
+queries = ["forward deployed engineer", "applied ai engineer", "solutions engineer ai"]
+boards = ["greenhouse", "lever", "ashby"]
+
+[filters]
+remote_only = true
+allow_locations = ["Melbourne", "Australia", "Remote", "AU Remote", "APAC Remote"]
+exclude_locations = ["Sydney", "United States", "San Francisco", "New York", "Tel Aviv"]
+exclude_keywords = ["unpaid", "internship"]
+
+[scoring]
+high_companies = ["Anthropic", "OpenAI"]
+high_keywords = ["forward deployed", "applied ai", "solutions architect"]
+seniority_keywords = ["senior", "staff", "lead", "principal"]
+
+[notify]
+ntfy_topic = ""           # set in private config
+follow_up_days = 10       # apps older than this with no response get a follow-up draft

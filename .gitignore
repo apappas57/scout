@@ -4,8 +4,16 @@
 *.key
 *.token
 node_modules/
+.DS_Store
 .venv/
 venv/
 __pycache__/
 *.pyc
-.DS_Store
+.pytest_cache/
+# Private data: never commit
+config/scout.config.toml
+scout.db
+state/
+digests/
+logs/
+*.log
