@@ -9,6 +9,7 @@ import json
 import re
 
 from scout.models import Role
+from scout.llm import LLMError
 
 
 class DiscoverError(RuntimeError):
@@ -87,17 +88,40 @@ def _to_role(item: dict) -> Role:
     )
 
 
+def _dedupe(roles: list[Role]) -> list[Role]:
+    """Drop duplicate roles (same id) within a batch, keeping the first seen."""
+    seen, out = set(), []
+    for r in roles:
+        if r.id not in seen:
+            seen.add(r.id)
+            out.append(r)
+    return out
+
+
+def _discover_one(client, search: dict, timeout: int) -> list[Role]:
+    raw = client.complete(build_prompt(search), web=True, timeout=timeout)
+    return [_to_role(i) for i in _extract_json_array(raw) if isinstance(i, dict)]
+
+
 def discover(client, *, search: dict) -> list[Role]:
     """Run the discovery stage.
 
-    Builds a prompt from the search config, asks the LLM (web enabled) for live
-    role candidates, tolerantly parses the JSON array, and maps each object to a
-    Role. Raises DiscoverError on any parse failure.
+    When target_companies are set, search each company in its own web call
+    (per-company batching). Each call stays focused and fast, and the loop is
+    partial-safe: if one company's call times out or returns junk, that company
+    is skipped and the rest still return. With no target_companies, runs a single
+    general search (and DiscoverError from it propagates for the runner to catch).
+    Each web call is bounded by search.discover_timeout (default 240s per company).
     """
-    prompt = build_prompt(search)
-    # Web-enabled discovery makes many search round-trips, so it needs a far
-    # longer ceiling than the 120s default. Configurable via search.discover_timeout.
-    timeout = int(search.get("discover_timeout", 600))
-    raw = client.complete(prompt, web=True, timeout=timeout)
-    candidates = _extract_json_array(raw)
-    return [_to_role(item) for item in candidates if isinstance(item, dict)]
+    companies = search.get("target_companies") or []
+    timeout = int(search.get("discover_timeout", 240))
+    if not companies:
+        return _dedupe(_discover_one(client, search, timeout))
+    roles: list[Role] = []
+    for company in companies:
+        sub = dict(search, target_companies=[company])
+        try:
+            roles.extend(_discover_one(client, sub, timeout))
+        except (DiscoverError, LLMError):
+            continue  # partial-safe: skip this company, keep the others
+    return _dedupe(roles)
