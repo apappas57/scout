@@ -57,7 +57,7 @@ config + state to discover to verify to filter_dedupe to score to draft (HIGH on
 - Warm-path finder: for each HIGH role, before drafting a cold application, Scout searches Alex's network and summit contacts (and public signals) for an intro path into that company, and drafts the intro. Warm outreach converts far better than cold.
 
 ## Consolidation and reach (v2)
-- Dream-company watchlist: a priority list (Anthropic first) checked every run, with an immediate alert on any Melbourne or AU-remote match. This folds the existing "Anthropic AU Monitor" RemoteTrigger cron (trig_01NBVWEBqRrG1P8ATg4gyKcE) into Scout and retires the separate job.
+- Priority-company watchlist: a configurable list of top-priority targets checked every run, with an immediate alert on any Melbourne or AU-remote match. This folds a standalone company-monitor scheduled job into Scout and retires the separate job.
 - Interview-prep auto-trigger: when a tracker row flips to "interview", Scout generates the company prep pack (research, likely questions, Alex's STAR stories) plus the live-demo plan (demoing Scout itself).
 
 ## Scope

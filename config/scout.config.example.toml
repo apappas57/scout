@@ -25,7 +25,7 @@ exclude_locations = ["Sydney", "United States", "San Francisco", "New York", "Te
 exclude_keywords = ["unpaid", "internship"]
 
 [scoring]
-high_companies = ["Anthropic", "OpenAI"]
+high_companies = []        # your highest-priority companies; set the real list in your private config
 high_keywords = ["forward deployed", "applied ai", "solutions architect"]
 seniority_keywords = ["senior", "staff", "lead", "principal"]
 
