@@ -1,5 +1,12 @@
 enabled = true
 
+[sources]
+# Which discovery sources run. Override per run with SCOUT_SOURCES=ats or =llm.
+#   ats  reads company-owned ATS boards directly. Deterministic, no LLM, no key.
+#   llm  asks an LLM with web search. Broader, but only finds what is indexed.
+ats = true
+llm = true
+
 [profile]
 name = "Your Name"
 headline = "Applied-AI / Forward-Deployed Engineer"
@@ -9,14 +16,46 @@ calibration = "Notes on what HIGH vs MED looks like for you."
 [paths]
 db = "scout.db"
 cv = "~/Desktop/resumes/cv.pdf"
-legacy_tracker = "~/Desktop/resumes/Job_Application_Tracker.md"
 digests_dir = "digests"
 heartbeat = "state/heartbeat"
 
 [search]
 target_companies = ["Anthropic", "OpenAI", "Glean", "Canva", "Cresta"]
-queries = ["forward deployed engineer", "applied ai engineer", "solutions engineer ai"]
-boards = ["greenhouse", "lever", "ashby"]
+queries = ["forward deployed engineer", "applied ai engineer", "ai solutions engineer", "agent engineer", "llm engineer"]
+boards = ["greenhouse", "lever", "ashby", "smartrecruiters"]
+
+[signals]
+aggregator_probe = false  # true asks a search engine whether the posting has escaped
+                          # the company board. Strongest contest signal, one throttled
+                          # network call per shortlisted role.
+allow_review = true       # keep roles whose posting is silent on remote eligibility.
+                          # false keeps only positively confirmed ones.
+
+[ats]
+title_keywords = ["forward deployed", "applied ai", "ai engineer", "solutions architect", "solutions engineer", "agent engineer", "llm engineer"]
+delay = 0.4          # seconds between board calls, to stay polite
+timeout = 20.0
+with_content = true  # fetch descriptions: the remote gate and score stage read them
+max_detail = 25      # per-company cap on description requests
+verify_http = false  # the board API already proves the posting is open
+
+# The main registry, a separate TOML file of [[company]] rows. Comment out to
+# rely purely on the inline `companies` list below. Both are merged and
+# deduplicated on (board, slug).
+registry_file = "config/ats_companies.toml"
+
+# Extra boards on top of the registry file. `board` is one of greenhouse, lever,
+# ashby, smartrecruiters. `slug` is that company's id on that specific ATS, which
+# is frequently not the company name lowercased.
+#
+# VERIFY EVERY SLUG BEFORE ADDING IT. A registry full of 404s is worse than a
+# short one, and a board that answers 200 with an empty list reads as "this
+# company is not hiring". See the README.
+companies = [
+  { company = "Anthropic", board = "greenhouse", slug = "anthropic" },
+  { company = "Cognition", board = "ashby", slug = "cognition" },
+  { company = "Canva", board = "smartrecruiters", slug = "Canva" },
+]
 
 [filters]
 remote_only = true

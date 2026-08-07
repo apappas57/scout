@@ -33,9 +33,35 @@ DUR=$(( $(date +%s) - START_EPOCH ))
 printf '{"job":"scout-weekly","started_at":"%s","finished_at":"%s","exit_code":%d,"duration_s":%d}\n' \
   "$START_ISO" "$END_ISO" "$RC" "$DUR" > "$HB_FILE" 2>/dev/null
 
-# On failure, read the ntfy topic from the gitignored config and fire a durable
-# alert. The topic stays out of this file. If no topic is set, stay silent.
-if [ "$RC" -ne 0 ]; then
+# Yield assertion. An exit code is a claim, not evidence.
+#
+# Scout catches discovery errors internally and exits 0, so gating the alert on
+# $RC alone meant 7 consecutive failed runs (21 Jun to 2 Aug) reported healthy
+# while writing zero rows. This asserts a unit of work actually landed, the same
+# pattern agency-engine's health_registry uses: assert against the data, and let
+# that override the exit code.
+ROLES_BEFORE_WINDOW=$("$VENV_PY" - <<'PY' 2>/dev/null
+import sqlite3, pathlib
+try:
+    con = sqlite3.connect("scout.db")
+    # rows first seen in the last 2 days = this run's yield
+    n = con.execute(
+        "select count(*) from roles where first_seen_at >= datetime('now','-2 days')"
+    ).fetchone()[0]
+    print(n)
+except Exception:
+    print("-1")
+PY
+)
+[ -z "$ROLES_BEFORE_WINDOW" ] && ROLES_BEFORE_WINDOW=-1
+
+ZERO_YIELD=0
+if [ "$ROLES_BEFORE_WINDOW" = "0" ]; then
+  ZERO_YIELD=1
+fi
+
+# Alert on a real failure OR on a clean-exit-but-no-work run.
+if [ "$RC" -ne 0 ] || [ "$ZERO_YIELD" -eq 1 ]; then
   TOPIC="$("$VENV_PY" - <<'PY' 2>/dev/null
 import tomllib, pathlib
 p = pathlib.Path("config/scout.config.toml")
@@ -47,11 +73,18 @@ except Exception:
 PY
 )"
   if [ -n "$TOPIC" ]; then
+    if [ "$RC" -ne 0 ]; then
+      ALERT_TITLE="Scout weekly run FAILED"
+      ALERT_BODY="exit $RC after ${DUR}s. See logs/run_scout.log."
+    else
+      ALERT_TITLE="Scout ran clean but found NOTHING"
+      ALERT_BODY="exit 0 after ${DUR}s, zero new roles written. Exit code says healthy, the data says it did no work. See logs/run_scout.log."
+    fi
     curl -fsS \
-      -H "Title: Scout weekly run FAILED" \
+      -H "Title: $ALERT_TITLE" \
       -H "Priority: high" \
       -H "Tags: rotating_light" \
-      -d "exit $RC after ${DUR}s. See logs/run_scout.log." \
+      -d "$ALERT_BODY" \
       "https://ntfy.sh/$TOPIC" >/dev/null 2>&1 || true
   fi
 fi

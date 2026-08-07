@@ -1,0 +1,1170 @@
+# Scout ATS company registry
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# scout/discover.py asks an LLM with web access to find roles. That only ever surfaces what
+# is *indexed*, which is the same pool already sitting on Seek and LinkedIn by the time it is
+# crawlable. Roles appear on a company's own applicant tracking system days-to-weeks earlier,
+# and many AU-eligible remote roles never get syndicated at all. This registry is the list of
+# boards to poll directly, so Scout sees the long tail nobody else is looking at.
+#
+# Every slug below was probed live and returned HTTP 200 with at least one real posting on
+# 2026-08-02. Entries that 404'd were discarded rather than left in, because a dead slug costs
+# a network round trip on every weekly run forever and teaches you nothing.
+#
+# HOW TO ADD A COMPANY
+# --------------------
+# 1. Find the slug. Open the company's careers page and look at where the "apply" links point:
+#
+#      jobs.ashbyhq.com/<slug>              -> board = "ashby"
+#      boards.greenhouse.io/<slug>          -> board = "greenhouse"
+#      job-boards.greenhouse.io/<slug>      -> board = "greenhouse"
+#      jobs.lever.co/<slug>                 -> board = "lever"
+#      careers.smartrecruiters.com/<slug>   -> board = "smartrecruiters"
+#
+#    Workable is NOT a supported board. Its public widget endpoint either 404s or answers 200
+#    with an empty jobs array, which reads as "this company is not hiring" and is worse than
+#    no board at all. If a company's only board is Workable, leave it in the rejected list at
+#    the bottom of this file rather than adding a row that silently returns nothing.
+#
+#    If the careers page is JavaScript-rendered and shows no such link, grep the page source
+#    for "greenhouse", "ashby", "lever" or "boardToken". Glean, for example, hides its token in
+#    a JS variable (company = "gleanwork"). Heidi Health's Ashby slug is literally
+#    "heidihealth.com.au", so never assume the slug is just the lowercased company name.
+#
+# 2. Verify it BEFORE adding it. Curl the endpoint and confirm 200 plus a non-empty job list:
+#
+#      curl -s "https://boards-api.greenhouse.io/v1/boards/<slug>/jobs" | head -c 300
+#      curl -s "https://api.ashbyhq.com/posting-api/job-board/<slug>" | head -c 300
+#      curl -s "https://api.lever.co/v0/postings/<slug>?mode=json" | head -c 300
+#      curl -s "https://api.smartrecruiters.com/v1/companies/<slug>/postings" | head -c 300
+#
+#    Or use the helper, which returns (ok, posting_count, note) and only says ok on a 200 in
+#    the right shape with a non-zero count:
+#
+#      .venv/bin/python -c "from scout.ats import verify_slug; print(verify_slug('greenhouse', 'anthropic'))"
+#
+#    A 200 with zero jobs is not proof. Check the titles too: several obvious-looking slugs
+#    belong to a completely different company ("greenhouse/athena" is a household staffing
+#    agency, "greenhouse/ultimate" is an HVAC contractor, "greenhouse/peak" is a physiotherapy
+#    chain). Those were all rejected here.
+#
+# 3. Add the block, set verified to the date you checked, and put the evidence in note.
+#
+# WHAT BELONGS HERE
+# -----------------
+# A company earns a place only if it plausibly hires an applied-AI / forward-deployed /
+# AI-solutions / AI-native engineer AND there is a real path to an Australia-eligible or
+# genuinely global-remote role. Companies whose entire posting history is US-only or EMEA-only
+# were left out on purpose: the filter stage would reject their roles anyway, so carrying them
+# is pure cost. Breadth is the point, padding is not.
+#
+# The note field records the AU / APAC / remote evidence actually observed at verification
+# time. Posting mixes change, so treat notes as a reason the company is on the list, not as a
+# promise about what is open this week.
+
+# ---------------------------------------------------------------------------
+# Australia / New Zealand headquartered or with a standing AU office.
+# Highest-value section: lowest application volume, most likely AU-eligible.
+# ---------------------------------------------------------------------------
+
+[[company]]
+name = "Heidi Health"
+board = "ashby"
+slug = "heidihealth.com.au"
+verified = "2026-08-02"
+note = "Melbourne AI clinical scribe. Board carried a live Forward Deployed Engineer plus a pre-sales Solutions Engineer, and Melbourne/Brisbane/Sydney/Remote locations. Already a target in scout.config.toml."
+
+[[company]]
+name = "Lyrebird Health"
+board = "lever"
+slug = "lyrebirdhealth"
+verified = "2026-08-02"
+note = "Melbourne AI scribe. Board carried a Forward Deployed Engineer listing at verification. Direct Heidi competitor, same role shape."
+
+[[company]]
+name = "Maincode"
+board = "ashby"
+slug = "maincode"
+verified = "2026-08-02"
+note = "Melbourne AI lab building sovereign Australian models. Every posting is an AI engineering role in Melbourne or Australia. Almost invisible on the job boards."
+
+[[company]]
+name = "Relevance AI"
+board = "ashby"
+slug = "relevanceai"
+verified = "2026-08-02"
+note = "Sydney AI agent platform, small board (9 postings). Already a target in scout.config.toml."
+
+[[company]]
+name = "Lorikeet"
+board = "ashby"
+slug = "lorikeet"
+verified = "2026-08-02"
+note = "Sydney AI customer-support agents. Sydney HQ plus US remote. Exactly the deployed-engineer shape."
+
+[[company]]
+name = "Canva"
+board = "smartrecruiters"
+slug = "Canva"
+verified = "2026-08-02"
+note = "Slug is capitalised. Melbourne, Sydney, Brisbane, Adelaide postings. Lever 404s for Canva, which is why the board has to be recorded per company."
+
+[[company]]
+name = "Culture Amp"
+board = "greenhouse"
+slug = "cultureamp"
+verified = "2026-08-02"
+note = "Melbourne HQ. People-analytics domain overlaps the Bendigo workforce-analytics background."
+
+[[company]]
+name = "SafetyCulture"
+board = "ashby"
+slug = "safetyculture"
+verified = "2026-08-02"
+note = "Sydney HQ, operations software. Frontline-ops domain match."
+
+[[company]]
+name = "Airwallex"
+board = "ashby"
+slug = "airwallex"
+verified = "2026-08-02"
+note = "Melbourne founded, large board (600+ postings) with AU - Melbourne and AU - Sydney locations."
+
+[[company]]
+name = "Zeller"
+board = "lever"
+slug = "Zeller"
+verified = "2026-08-02"
+note = "Slug is capitalised. Melbourne fintech, Melbourne/Adelaide/Brisbane/Perth/Sydney postings."
+
+[[company]]
+name = "Xero"
+board = "ashby"
+slug = "xero"
+verified = "2026-08-02"
+note = "Melbourne (260 Burwood Rd) and NZ Remote Worker locations both present on the board."
+
+[[company]]
+name = "Deputy"
+board = "lever"
+slug = "deputy"
+verified = "2026-08-02"
+note = "Sydney workforce-management platform. Rostering and shift-ops is the closest commercial analogue to the Bendigo workforce-analytics work."
+
+[[company]]
+name = "Eucalyptus"
+board = "greenhouse"
+slug = "eucalyptus"
+verified = "2026-08-02"
+note = "AU digital health. Board uses explicit AU - Remote - VIC / QLD / SA / WA location tags, which is rare and directly AU-remote eligible."
+
+[[company]]
+name = "Mable"
+board = "lever"
+slug = "mable"
+verified = "2026-08-02"
+note = "Melbourne, Sydney, Brisbane. Care-workforce marketplace, workforce-ops domain match."
+
+[[company]]
+name = "Judo Bank"
+board = "smartrecruiters"
+slug = "judobank"
+verified = "2026-08-02"
+note = "Melbourne HQ. AU banking domain match against the Bendigo Bank background."
+
+[[company]]
+name = "Prospa"
+board = "greenhouse"
+slug = "prospa"
+verified = "2026-08-02"
+note = "Melbourne and Sydney. AU SME lending."
+
+[[company]]
+name = "Zip"
+board = "ashby"
+slug = "zip"
+verified = "2026-08-02"
+note = "Sydney and Australia locations plus US remote. Board carried a Solution Engineer (Pre-Sales) at verification."
+
+[[company]]
+name = "Wisr"
+board = "lever"
+slug = "wisr"
+verified = "2026-08-02"
+note = "Sydney consumer lender. Small board, low application volume."
+
+[[company]]
+name = "Plenti"
+board = "lever"
+slug = "plenti"
+verified = "2026-08-02"
+note = "Sydney and Adelaide. AU lending fintech."
+
+[[company]]
+name = "Immutable"
+board = "lever"
+slug = "immutable"
+verified = "2026-08-02"
+note = "Sydney. Small board, engineering-heavy."
+
+[[company]]
+name = "Dovetail"
+board = "ashby"
+slug = "dovetail"
+verified = "2026-08-02"
+note = "Sydney plus US Remote. Research-ops product, small board."
+
+[[company]]
+name = "Sitemate"
+board = "ashby"
+slug = "sitemate"
+verified = "2026-08-02"
+note = "Sydney. Construction and field-ops software, adjacent to the Groundwork trade-business domain."
+
+[[company]]
+name = "Hipages"
+board = "greenhouse"
+slug = "hipagesgroup"
+verified = "2026-08-02"
+note = "Sydney. Trades marketplace, direct overlap with the Groundwork client base."
+
+[[company]]
+name = "Airtasker"
+board = "ashby"
+slug = "airtasker"
+verified = "2026-08-02"
+note = "Sydney (Hybrid). Marketplace ops."
+
+[[company]]
+name = "InDebted"
+board = "lever"
+slug = "indebted"
+verified = "2026-08-02"
+note = "Sydney and New Zealand. AI-driven collections, financial-services domain match."
+
+[[company]]
+name = "SiteMinder"
+board = "ashby"
+slug = "siteminder"
+verified = "2026-08-02"
+note = "Sydney HQ, 44 postings. Hospitality distribution platform."
+
+[[company]]
+name = "Objective Corporation"
+board = "lever"
+slug = "objective"
+verified = "2026-08-02"
+note = "Melbourne, Brisbane, Canberra, Sydney. AU government and regulated-content software, so solutions work is delivery-heavy."
+
+[[company]]
+name = "Kasada"
+board = "lever"
+slug = "kasada"
+verified = "2026-08-02"
+note = "Sydney bot-defence. Tiny board, effectively invisible on aggregators."
+
+[[company]]
+name = "Secure Code Warrior"
+board = "lever"
+slug = "securecodewarrior"
+verified = "2026-08-02"
+note = "Sydney. Developer security training."
+
+[[company]]
+name = "Q-CTRL"
+board = "lever"
+slug = "q-ctrl"
+verified = "2026-08-02"
+note = "Sydney quantum control software. Hyphenated slug, would not be found by naive slugification."
+
+[[company]]
+name = "Emesent"
+board = "lever"
+slug = "Emesent"
+verified = "2026-08-02"
+note = "Slug is capitalised. Brisbane autonomy and LiDAR mapping."
+
+[[company]]
+name = "ROLLER"
+board = "greenhouse"
+slug = "roller"
+verified = "2026-08-02"
+note = "Melbourne and Sydney plus US. Venue-management SaaS."
+
+[[company]]
+name = "Cyara"
+board = "lever"
+slug = "cyara"
+verified = "2026-08-02"
+note = "Melbourne founded, Australia location present, APAC GTM roles. Customer-experience and contact-centre assurance, which is the exact Bendigo contact-centre domain."
+
+[[company]]
+name = "Versent"
+board = "smartrecruiters"
+slug = "versent"
+verified = "2026-08-02"
+note = "Melbourne and Sydney cloud consultancy (Stax). Solutions-architect roles are the core of their delivery model."
+
+[[company]]
+name = "Nearmap"
+board = "smartrecruiters"
+slug = "nearmap"
+verified = "2026-08-02"
+note = "Sydney (Barangaroo). Aerial imagery and AI-derived geospatial content."
+
+[[company]]
+name = "Octopus Deploy"
+board = "greenhouse"
+slug = "octopusdeploy"
+verified = "2026-08-02"
+note = "Brisbane. Uses an explicit Australia/New Zealand location tag, so its roles are AU-remote by default."
+
+[[company]]
+name = "Karbon"
+board = "greenhouse"
+slug = "karbon"
+verified = "2026-08-02"
+note = "AU-founded accounting practice platform, distributed team. Currently US-weighted, kept for the AU-remote history."
+
+[[company]]
+name = "Auror"
+board = "ashby"
+slug = "auror"
+verified = "2026-08-02"
+note = "Auckland HQ with a Melbourne office and Remote - New Zealand postings. Retail crime intelligence, so investigations domain overlaps financial-crimes analytics."
+
+[[company]]
+name = "Halter"
+board = "ashby"
+slug = "halter"
+verified = "2026-08-02"
+note = "NZ agritech with Melbourne, Brisbane and South Australia postings. Large board (288) for a company almost never seen on Seek."
+
+[[company]]
+name = "Tracksuit"
+board = "lever"
+slug = "tracksuit-limited"
+verified = "2026-08-02"
+note = "Auckland and Sydney. Slug is tracksuit-limited, not tracksuit, which is why it must be verified per company."
+
+[[company]]
+name = "Re-Leased"
+board = "greenhouse"
+slug = "released"
+verified = "2026-08-02"
+note = "Auckland property software. Board carried a Customer AI Deployment Consultant at verification, which is a forward-deployed role in all but name. Slug is released, not re-leased."
+
+[[company]]
+name = "Cin7"
+board = "lever"
+slug = "cin7"
+verified = "2026-08-02"
+note = "Auckland inventory platform."
+
+# ---------------------------------------------------------------------------
+# Frontier labs and AI-native companies with observed AU, APAC or global-remote
+# hiring. These are the highest-fit roles; the board is where they appear first.
+# ---------------------------------------------------------------------------
+
+[[company]]
+name = "Anthropic"
+board = "greenhouse"
+slug = "anthropic"
+verified = "2026-08-02"
+note = "400 postings. Add ?content=true for full descriptions. Primary target in scout.config.toml."
+
+[[company]]
+name = "OpenAI"
+board = "ashby"
+slug = "openai"
+verified = "2026-08-02"
+note = "754 postings including Sydney, Australia. Primary target in scout.config.toml."
+
+[[company]]
+name = "Cognition"
+board = "ashby"
+slug = "cognition"
+verified = "2026-08-02"
+note = "Sydney location present. Already a target in scout.config.toml."
+
+[[company]]
+name = "Cresta"
+board = "greenhouse"
+slug = "cresta"
+verified = "2026-08-02"
+note = "Explicit Australia (Remote) postings. Contact-centre AI, the single closest domain match to six years of Bendigo contact-centre workforce analytics."
+
+[[company]]
+name = "Sierra"
+board = "ashby"
+slug = "sierra"
+verified = "2026-08-02"
+note = "Sydney plus remote. Agent company that hires forward-deployed engineers as its core delivery motion."
+
+[[company]]
+name = "Harvey"
+board = "ashby"
+slug = "harvey"
+verified = "2026-08-02"
+note = "Sydney and Remote across a 360-posting board. Heavy forward-deployed hiring."
+
+[[company]]
+name = "Decagon"
+board = "ashby"
+slug = "decagon"
+verified = "2026-08-02"
+note = "Australia location present. Customer-support AI agents, FDE-heavy."
+
+[[company]]
+name = "Glean"
+board = "greenhouse"
+slug = "gleanwork"
+verified = "2026-08-02"
+note = "Slug is gleanwork, hidden in a JS variable on the careers page; greenhouse/glean 404s and smartrecruiters/glean is a different company. Already a target in scout.config.toml."
+
+[[company]]
+name = "Anysphere (Cursor)"
+board = "ashby"
+slug = "cursor"
+verified = "2026-08-02"
+note = "Australia and Remote locations present. Slug is cursor, not anysphere."
+
+[[company]]
+name = "Mistral AI"
+board = "ashby"
+slug = "mistral.ai"
+verified = "2026-08-02"
+note = "Slug contains a dot. Melbourne location present on a 173-posting board."
+
+[[company]]
+name = "Cohere"
+board = "ashby"
+slug = "cohere"
+verified = "2026-08-02"
+note = "Already a target in scout.config.toml. Distributed hiring, watch the location filter."
+
+[[company]]
+name = "Perplexity"
+board = "ashby"
+slug = "perplexity"
+verified = "2026-08-02"
+note = "Frontier-adjacent, expanding APAC. Location filter will do the work."
+
+[[company]]
+name = "LangChain"
+board = "ashby"
+slug = "langchain"
+verified = "2026-08-02"
+note = "Explicit Remote - Australia postings. Agent tooling, strong fit for the multi-agent build history."
+
+[[company]]
+name = "ElevenLabs"
+board = "ashby"
+slug = "elevenlabs"
+verified = "2026-08-02"
+note = "Australia and Remote locations present."
+
+[[company]]
+name = "Deepgram"
+board = "ashby"
+slug = "deepgram"
+verified = "2026-08-02"
+note = "Uses an explicit APAC | Remote location tag. Speech AI, contact-centre adjacent."
+
+[[company]]
+name = "Distyl AI"
+board = "ashby"
+slug = "distyl"
+verified = "2026-08-02"
+note = "Slug is distyl, not distylai. Board carried AI Engineer and AI Strategist roles, which is the enterprise forward-deployed model."
+
+[[company]]
+name = "Chalk"
+board = "ashby"
+slug = "chalk"
+verified = "2026-08-02"
+note = "Board carried an explicit Forward Deployed Engineer listing at verification."
+
+[[company]]
+name = "Factory"
+board = "ashby"
+slug = "factory"
+verified = "2026-08-02"
+note = "Remote - APAC location present, plus a Solutions Engineer listing."
+
+[[company]]
+name = "Legora"
+board = "ashby"
+slug = "legora"
+verified = "2026-08-02"
+note = "Sydney and Global locations on a 274-posting board. Legal AI, heavy deployment hiring."
+
+[[company]]
+name = "Rogo"
+board = "ashby"
+slug = "rogo"
+verified = "2026-08-02"
+note = "Sydney, Australia location present. Financial-services AI, domain match."
+
+[[company]]
+name = "Hebbia"
+board = "ashby"
+slug = "hebbia-ai"
+verified = "2026-08-02"
+note = "Slug is hebbia-ai, not hebbia. Remote postings. Financial-services document AI."
+
+[[company]]
+name = "CodeRabbit"
+board = "ashby"
+slug = "coderabbit"
+verified = "2026-08-02"
+note = "Australia and remote locations present."
+
+[[company]]
+name = "Together AI"
+board = "greenhouse"
+slug = "togetherai"
+verified = "2026-08-02"
+note = "Remote postings. Inference platform."
+
+[[company]]
+name = "Fireworks AI"
+board = "ashby"
+slug = "fireworksai"
+verified = "2026-08-02"
+note = "Remote postings. Inference platform, hires applied and solutions engineers."
+
+[[company]]
+name = "Cerebras"
+board = "ashby"
+slug = "cerebras"
+verified = "2026-08-02"
+note = "Remote Office locations on a 125-posting board."
+
+[[company]]
+name = "RunPod"
+board = "ashby"
+slug = "runpod"
+verified = "2026-08-02"
+note = "Explicit Remote - APAC postings, which is unusually AU-friendly for GPU infra."
+
+[[company]]
+name = "Braintrust Data"
+board = "ashby"
+slug = "braintrust"
+verified = "2026-08-02"
+note = "Slug is braintrust. Remote postings. LLM evaluation tooling, relevant to agent-system work."
+
+[[company]]
+name = "Arize AI"
+board = "greenhouse"
+slug = "arizeai"
+verified = "2026-08-02"
+note = "Explicit Remote (Australia/New Zealand) postings. LLM observability."
+
+[[company]]
+name = "Invisible Technologies"
+board = "smartrecruiters"
+slug = "invisibletechnologies"
+verified = "2026-08-02"
+note = "Board carried an Automation Engineer - Worldwide Remote listing. AI operations delivery, genuinely global hiring."
+
+[[company]]
+name = "Camunda"
+board = "ashby"
+slug = "camunda"
+verified = "2026-08-02"
+note = "Remote postings. Already a target in scout.config.toml. Process orchestration, solutions-architect heavy."
+
+[[company]]
+name = "Talkdesk"
+board = "greenhouse"
+slug = "talkdesk2"
+verified = "2026-08-02"
+note = "Slug is talkdesk2, not talkdesk. Contact-centre AI, exactly the Bendigo domain. Distributed hiring, location filter applies."
+
+[[company]]
+name = "Assembled"
+board = "ashby"
+slug = "assembledhq"
+verified = "2026-08-02"
+note = "Slug is assembledhq. Support-team workforce management plus AI agents, the single closest product analogue to the Variance WFM build and the Bendigo forecasting work."
+
+[[company]]
+name = "Quantexa"
+board = "ashby"
+slug = "quantexa"
+verified = "2026-08-02"
+note = "Melbourne location present. Financial-crime decision intelligence, a direct match to the financial-crimes portfolio at Bendigo."
+
+[[company]]
+name = "Sardine"
+board = "ashby"
+slug = "sardine"
+verified = "2026-08-02"
+note = "Australia location present, plus a Solutions Architect listing. Fraud and AML, domain match."
+
+[[company]]
+name = "Feedzai"
+board = "greenhouse"
+slug = "feedzai"
+verified = "2026-08-02"
+note = "Uses a Global location tag. Financial-crime AI, domain match."
+
+[[company]]
+name = "Elation Health"
+board = "greenhouse"
+slug = "elationhealth"
+verified = "2026-08-02"
+note = "Carries a US, Canada OR New Zealand - Remote posting, which is a rare NZ-eligible remote tag."
+
+[[company]]
+name = "Sword Health"
+board = "lever"
+slug = "swordhealth"
+verified = "2026-08-02"
+note = "Remote postings, distributed health-AI company."
+
+# ---------------------------------------------------------------------------
+# Developer platforms and infrastructure with AU or global-remote hiring.
+# These hire solutions architects and deployed engineers, and are remote-friendly.
+# ---------------------------------------------------------------------------
+
+[[company]]
+name = "Vercel"
+board = "greenhouse"
+slug = "vercel"
+verified = "2026-08-02"
+note = "Explicit Remote - Australia and Hybrid - Sydney postings. Matches the Next.js and Vercel stack used daily at Groundwork."
+
+[[company]]
+name = "Supabase"
+board = "ashby"
+slug = "supabase"
+verified = "2026-08-02"
+note = "APAC and Remote locations. Fully remote company, and the Groundwork production stack."
+
+[[company]]
+name = "Netlify"
+board = "greenhouse"
+slug = "netlify"
+verified = "2026-08-02"
+note = "Remote postings, small board."
+
+[[company]]
+name = "Railway"
+board = "ashby"
+slug = "railway"
+verified = "2026-08-02"
+note = "Uses a Global location tag. Tiny board, very low application volume."
+
+[[company]]
+name = "PlanetScale"
+board = "greenhouse"
+slug = "planetscale"
+verified = "2026-08-02"
+note = "Carries Remote - NA, APAC, EMEA postings."
+
+[[company]]
+name = "Databricks"
+board = "greenhouse"
+slug = "databricks"
+verified = "2026-08-02"
+note = "Melbourne, Brisbane, Auckland and Australian Capital Territory postings on an 800-posting board. Already a target in scout.config.toml."
+
+[[company]]
+name = "Snowflake"
+board = "ashby"
+slug = "snowflake"
+verified = "2026-08-02"
+note = "Uses AU-Melbourne and AU-Victoria-Remote location tags, which is about as AU-remote-explicit as it gets."
+
+[[company]]
+name = "Confluent"
+board = "ashby"
+slug = "confluent"
+verified = "2026-08-02"
+note = "Country-remote location tags. Streaming platform, solutions-architect heavy."
+
+[[company]]
+name = "MongoDB"
+board = "greenhouse"
+slug = "mongodb"
+verified = "2026-08-02"
+note = "Large board with a standing APAC solutions-architecture function."
+
+[[company]]
+name = "Elastic"
+board = "greenhouse"
+slug = "elastic"
+verified = "2026-08-02"
+note = "Sydney, Australia postings. Distributed-first company."
+
+[[company]]
+name = "ClickHouse"
+board = "greenhouse"
+slug = "clickhouse"
+verified = "2026-08-02"
+note = "Explicit Australia (remote) postings."
+
+[[company]]
+name = "Cockroach Labs"
+board = "greenhouse"
+slug = "cockroachlabs"
+verified = "2026-08-02"
+note = "Global and Remote, Singapore locations present, so APAC hiring is live."
+
+[[company]]
+name = "TigerData (Timescale)"
+board = "ashby"
+slug = "tigerdata"
+verified = "2026-08-02"
+note = "Slug is tigerdata after the rebrand; timescale 404s. Remote postings."
+
+[[company]]
+name = "Grafana Labs"
+board = "greenhouse"
+slug = "grafanalabs"
+verified = "2026-08-02"
+note = "Remote-first with country-remote tags across a 142-posting board."
+
+[[company]]
+name = "GitLab"
+board = "greenhouse"
+slug = "gitlab"
+verified = "2026-08-02"
+note = "All-remote company. Location filter will still need to reject the US-only tags."
+
+[[company]]
+name = "Sourcegraph"
+board = "greenhouse"
+slug = "sourcegraph91"
+verified = "2026-08-02"
+note = "Slug is sourcegraph91, not sourcegraph. Remote postings. Code AI."
+
+[[company]]
+name = "Canonical"
+board = "greenhouse"
+slug = "canonical"
+verified = "2026-08-02"
+note = "Uses Home Based - APAC location tags across a 303-posting board, and is explicitly remote-first worldwide. One of the strongest AU-remote sources here."
+
+[[company]]
+name = "Cloudflare"
+board = "greenhouse"
+slug = "cloudflare"
+verified = "2026-08-02"
+note = "Remote and hybrid postings, standing APAC presence."
+
+[[company]]
+name = "Twilio"
+board = "greenhouse"
+slug = "twilio"
+verified = "2026-08-02"
+note = "Explicit Remote - Australia postings. Also runs a large solutions-engineering function."
+
+[[company]]
+name = "Stripe"
+board = "greenhouse"
+slug = "stripe"
+verified = "2026-08-02"
+note = "Australia location present on a 548-posting board."
+
+[[company]]
+name = "Postman"
+board = "greenhouse"
+slug = "postman"
+verified = "2026-08-02"
+note = "Australia location present."
+
+[[company]]
+name = "Kong"
+board = "ashby"
+slug = "kong"
+verified = "2026-08-02"
+note = "Australia and Sydney, Australia postings. API platform, solutions-engineer heavy."
+
+[[company]]
+name = "Vanta"
+board = "ashby"
+slug = "vanta"
+verified = "2026-08-02"
+note = "Sydney, Australia postings."
+
+[[company]]
+name = "Sentry"
+board = "ashby"
+slug = "sentry"
+verified = "2026-08-02"
+note = "Sydney, Australia postings."
+
+[[company]]
+name = "PostHog"
+board = "ashby"
+slug = "posthog"
+verified = "2026-08-02"
+note = "Remote postings, fully distributed and openly hires worldwide."
+
+[[company]]
+name = "Percona"
+board = "ashby"
+slug = "percona"
+verified = "2026-08-02"
+note = "Remote postings, fully distributed company."
+
+[[company]]
+name = "Prefect"
+board = "ashby"
+slug = "prefect"
+verified = "2026-08-02"
+note = "Remote postings, small board. Orchestration tooling."
+
+[[company]]
+name = "Linear"
+board = "ashby"
+slug = "linear"
+verified = "2026-08-02"
+note = "Fully remote company, small board. Locations are often unstated, so verify per role."
+
+[[company]]
+name = "Replit"
+board = "ashby"
+slug = "replit"
+verified = "2026-08-02"
+note = "Country-remote tags including Japan, so APAC hiring exists. Verify per role."
+
+[[company]]
+name = "StackBlitz (Bolt)"
+board = "greenhouse"
+slug = "stackblitz"
+verified = "2026-08-02"
+note = "Slug is stackblitz, not bolt. Remote postings, tiny board."
+
+[[company]]
+name = "Zapier"
+board = "ashby"
+slug = "zapier"
+verified = "2026-08-02"
+note = "Uses an APAC location tag and is fully remote by policy."
+
+[[company]]
+name = "Remote"
+board = "greenhouse"
+slug = "remotecom"
+verified = "2026-08-02"
+note = "Slug is remotecom. Global-employment company, country-remote tags across a 215-posting board."
+
+[[company]]
+name = "Toptal"
+board = "lever"
+slug = "toptal"
+verified = "2026-08-02"
+note = "Uses an Anywhere location tag. Fully distributed."
+
+[[company]]
+name = "ClickUp"
+board = "ashby"
+slug = "clickup"
+verified = "2026-08-02"
+note = "Remote postings."
+
+[[company]]
+name = "Atlan"
+board = "ashby"
+slug = "atlan"
+verified = "2026-08-02"
+note = "Remote-first data-catalogue company with APAC roots. Small board."
+
+# ---------------------------------------------------------------------------
+# Enterprise software, data and CX platforms with a standing AU office.
+# Lower fit density than the AI-native section, but they hire solutions
+# architects and AI solutions engineers into Melbourne and Sydney.
+# ---------------------------------------------------------------------------
+
+[[company]]
+name = "Figma"
+board = "greenhouse"
+slug = "figma"
+verified = "2026-08-02"
+note = "Sydney and Melbourne, Australia postings."
+
+[[company]]
+name = "Notion"
+board = "ashby"
+slug = "notion"
+verified = "2026-08-02"
+note = "Sydney, Australia postings."
+
+[[company]]
+name = "Miro"
+board = "ashby"
+slug = "miro"
+verified = "2026-08-02"
+note = "AUSTRALIA and Sydney locations present."
+
+[[company]]
+name = "Asana"
+board = "greenhouse"
+slug = "asana"
+verified = "2026-08-02"
+note = "Sydney and Remote postings."
+
+[[company]]
+name = "Intercom"
+board = "greenhouse"
+slug = "intercom"
+verified = "2026-08-02"
+note = "Sydney, Australia postings. Heavy AI-agent product investment, support domain."
+
+[[company]]
+name = "Dialpad"
+board = "greenhouse"
+slug = "dialpad"
+verified = "2026-08-02"
+note = "Sydney, Australia and Anywhere, US postings. AI contact-centre, domain match."
+
+[[company]]
+name = "Aircall"
+board = "lever"
+slug = "aircall"
+verified = "2026-08-02"
+note = "Sydney Office plus country-remote tags. Voice and contact-centre."
+
+[[company]]
+name = "Qualtrics"
+board = "greenhouse"
+slug = "qualtrics"
+verified = "2026-08-02"
+note = "Sydney, New South Wales postings. Experience management, analytics-adjacent."
+
+[[company]]
+name = "Klaviyo"
+board = "greenhouse"
+slug = "klaviyo"
+verified = "2026-08-02"
+note = "Sydney, AU postings."
+
+[[company]]
+name = "Braze"
+board = "greenhouse"
+slug = "braze"
+verified = "2026-08-02"
+note = "Sydney postings on a 247-posting board."
+
+[[company]]
+name = "Attentive"
+board = "greenhouse"
+slug = "attentive"
+verified = "2026-08-02"
+note = "Sydney postings."
+
+[[company]]
+name = "Workato"
+board = "greenhouse"
+slug = "workato"
+verified = "2026-08-02"
+note = "Sydney, Australia postings. Integration and agentic automation, solutions-architect heavy."
+
+[[company]]
+name = "UiPath"
+board = "ashby"
+slug = "uipath"
+verified = "2026-08-02"
+note = "Melbourne and Remote postings. Automation delivery is forward-deployed work by another name."
+
+[[company]]
+name = "Appian"
+board = "greenhouse"
+slug = "appian"
+verified = "2026-08-02"
+note = "Melbourne and Sydney, Australia postings. Process automation, delivery-consultant heavy."
+
+[[company]]
+name = "Thoughtworks"
+board = "greenhouse"
+slug = "thoughtworks"
+verified = "2026-08-02"
+note = "Melbourne, Sydney and Brisbane postings. Consultancy model means client-facing engineering, which is the FDE skill set."
+
+[[company]]
+name = "LaunchDarkly"
+board = "greenhouse"
+slug = "launchdarkly"
+verified = "2026-08-02"
+note = "Uses an APAC - Australia location tag."
+
+[[company]]
+name = "Abnormal Security"
+board = "greenhouse"
+slug = "abnormalsecurity"
+verified = "2026-08-02"
+note = "Explicit Remote - Australia postings."
+
+[[company]]
+name = "Bugcrowd"
+board = "greenhouse"
+slug = "bugcrowd"
+verified = "2026-08-02"
+note = "Explicit Remote - Australia postings. AU-founded."
+
+[[company]]
+name = "Tines"
+board = "greenhouse"
+slug = "tines"
+verified = "2026-08-02"
+note = "Sydney, New South Wales postings. Security automation, workflow-orchestration domain."
+
+[[company]]
+name = "Torq"
+board = "greenhouse"
+slug = "torq"
+verified = "2026-08-02"
+note = "Uses an APAC location tag. Security hyperautomation."
+
+[[company]]
+name = "JFrog"
+board = "greenhouse"
+slug = "jfrog"
+verified = "2026-08-02"
+note = "Sydney postings."
+
+[[company]]
+name = "Algolia"
+board = "greenhouse"
+slug = "algolia"
+verified = "2026-08-02"
+note = "Explicit Remote - Australia and Sydney postings."
+
+[[company]]
+name = "Contentful"
+board = "greenhouse"
+slug = "contentful"
+verified = "2026-08-02"
+note = "Sydney, Australia postings."
+
+[[company]]
+name = "Mixpanel"
+board = "greenhouse"
+slug = "mixpanel"
+verified = "2026-08-02"
+note = "Sydney, Australia (Hybrid) postings. Product analytics, analytics-domain match."
+
+[[company]]
+name = "Amplitude"
+board = "greenhouse"
+slug = "amplitude"
+verified = "2026-08-02"
+note = "Large distributed board with an APAC presence. Analytics-domain match."
+
+[[company]]
+name = "Hightouch"
+board = "greenhouse"
+slug = "hightouch"
+verified = "2026-08-02"
+note = "Uses an Australia/Singapore location tag. Data activation, hires solutions architects."
+
+[[company]]
+name = "Fivetran"
+board = "greenhouse"
+slug = "fivetran"
+verified = "2026-08-02"
+note = "Explicit Remote, Australia, APAC postings."
+
+[[company]]
+name = "Sigma Computing"
+board = "greenhouse"
+slug = "sigmacomputing"
+verified = "2026-08-02"
+note = "Australia and Remote postings. BI on the warehouse, analytics-domain match."
+
+[[company]]
+name = "Omni"
+board = "ashby"
+slug = "omni"
+verified = "2026-08-02"
+note = "Sydney, Australia postings. BI tooling, small board."
+
+[[company]]
+name = "LearnUpon"
+board = "greenhouse"
+slug = "learnupon"
+verified = "2026-08-02"
+note = "Sydney, Australia postings. Learning platform, workforce-enablement domain."
+
+[[company]]
+name = "Block"
+board = "greenhouse"
+slug = "block"
+verified = "2026-08-02"
+note = "Melbourne, Brisbane, Canberra, Perth and Sydney postings (Square and Afterpay). Distributed-by-default company."
+
+[[company]]
+name = "Adyen"
+board = "greenhouse"
+slug = "adyen"
+verified = "2026-08-02"
+note = "Sydney postings. Payments, solutions-engineering heavy."
+
+# ---------------------------------------------------------------------------
+# PROBED AND REJECTED
+# ---------------------------------------------------------------------------
+# Recorded so nobody burns another afternoon re-trying a slug that is already ruled out.
+# Roughly 420 slug/board combinations were probed across ~330 candidate companies on
+# 2026-08-02 to produce the 146 entries above.
+#
+# Rejected because the obvious slug belongs to a DIFFERENT company (all returned 200,
+# which is exactly why a bare status check is not enough; read the job titles):
+#   greenhouse/athena    -> a household-staffing agency, not Athena Home Loans
+#   greenhouse/ignition  -> a franchise manager-training program, not Ignition
+#   greenhouse/ultimate  -> an HVAC and plumbing contractor, not Ultimate.ai
+#   greenhouse/peak      -> a physiotherapy clinic chain, not Peak AI
+#   greenhouse/beam      -> an education nonprofit, not Beam AI
+#   greenhouse/weave     -> Weave Communications, not Weave/W&B
+#   ashby/crisp          -> a Dutch grocery-delivery company, not Crisp chat
+#   ashby/healthmatch    -> a US clinical-trials operator, not AU HealthMatch
+#   lever/basis          -> an adtech DSP, not Basis the AI company
+#   smartrecruiters/glean-> a small unrelated employer; real Glean is greenhouse/gleanwork
+#
+# No board found (careers page uses Workday, Teamtailor, LiveHire, or a bespoke ATS).
+# Re-check occasionally, companies migrate:
+#   Atlassian, Employment Hero, Deel (page links jobs.ashbyhq.com/Deel but the posting API
+#   404s), Rippling, Retool, dbt Labs, HashiCorp, Weights & Biases, Replicate, Fly.io,
+#   Qdrant, Snyk, DigitalOcean, Linktree, Go1, Skedulo, Simpro, Assignar, Tanda,
+#   Humanforce, ELMO, ServiceM8, HotDoc, Coviu, Harrison.ai, Annalise.ai, Propeller Aero,
+#   Tyro, Zepto, Constantinople, Sharesies, Hnry, LawVu, Marketplacer, Ansarada, Nuix,
+#   Whispir, Sonder, MYOB, Rokt, Cover Genius, SiteMinder's AU-only board, Grammarly,
+#   Zendesk, Ada, Forethought, Census, Loom, Adept, Dagster, Doist, Hotjar, Toggl,
+#   Kapa.ai, Revolut, Mistral's lever board, Coursera, Pluralsight
+#
+# Verified live but deliberately EXCLUDED, because every observed posting was US-only,
+# EMEA-only or single-country outside the allow list. Adding them would cost a fetch every
+# week to feed roles the filter would reject anyway. If one opens AU or global-remote
+# hiring, promote it:
+#   Abridge, Ambience Healthcare, Commure, Anterior, Cohere Health, Qventus, Suki AI,
+#   Freed, Canvas Medical, Nabla, Corti, Instabase, Hyperscience, Ironclad, Alloy, Persona,
+#   Middesk, Socure, Upstart, Zest AI, Nova Credit, Forter, Sift, Riskified, Pagaya,
+#   Taktile, Oscilar, Blend, Mercury, Ramp, Brex, Wise, Nium, Thunes, Marqeta, Gong,
+#   Salesloft, Apollo.io, Outreach, Nooks, Artisan, Clay, Level AI, Observe.AI, Five9,
+#   Parloa, PolyAI, Glia, Netomi, Quiq, Maven AGI, Vapi, Bland AI, Rilla, Pallet,
+#   ComplyAdvantage, Sixfold, Poolside, Galileo, Isomorphic Labs, Nebius, Crusoe,
+#   CoreWeave, Dropbox, Chainguard, Scale AI, Writer, Synthesia, Modal, Baseten, Neon,
+#   Render, Redis, Airbyte, Monte Carlo, Encord, Labelbox, Snorkel AI, Mercor, Handshake,
+#   Anyscale, LlamaIndex, Langfuse, Vellum, Credal, OpenRouter, LiteLLM, Mem0, Letta,
+#   Temporal, n8n, Pylon, Plain, Unify, Webflow, Builder.io, Lovable, Warp, Zed, Greptile,
+#   Graphite, Cline, Attio, Resend, WorkOS, Stytch, Descope, Granola, Circleback, Twenty,
+#   Shortcut, Knock, Docebo, 360Learning, Thinkific, Otter.ai, Sana, Dust, Sourcegraph's
+#   EMEA roles, Sword Health's EU roles
+#
+# Verified live but excluded as OFF-DOMAIN (no plausible applied-AI or solutions-engineering
+# role, or hardware/lab-bound work):
+#   Rocket Lab, Cochlear, ResMed, Vow, Gusto, Justworks, Turing, Andela, Udemy, Duolingo,
+#   Aha!, Close, Buffer, Ghost, Mux, Sanity, Storyblok, Prismic, Bubble, Make, Celonis,
+#   Nintex, ServiceNow, Freshworks, Gorgias, Kustomer, Help Scout, Chatbase, Rasa, Kore.ai,
+#   Boost.ai, Juro, Tractable, Faculty, Multiverse, Adaptive ML, Atomicwork, Unblocked,
+#   Fullstory, Pendo, Zeta Global, Amperity, Matillion, Starburst, Hex, Fastly, Datadog,
+#   Airtable, Lightspeed Commerce, Lightning AI, SambaNova, Chroma, Pinecone, Weaviate,
+#   Zilliz, Deepgram's non-APAC roles, Suno, HeyGen, Photoroom, Recraft, Krea, Ideogram,
+#   Luma AI, Runway, Black Forest Labs, Stability AI, Tavus, Hume AI, Cartesia, Genspark,
+#   Descript, Imbue, Reka AI, Twelve Labs, Speechmatics, AssemblyAI, Owkin, Comet ML,
+#   Neptune AI, Union AI, Chalk's non-FDE roles, Endex, Tabs, Levelpath, Rogo's US roles
