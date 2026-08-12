@@ -1,0 +1,45 @@
+{
+  "jobs": [
+    {
+      "id": 4400001001,
+      "internal_job_id": 2600001,
+      "title": "Forward Deployed Engineer",
+      "updated_at": "2026-07-30T09:15:00-04:00",
+      "first_published": "2026-07-21T10:00:00-04:00",
+      "requisition_id": "R-1042",
+      "absolute_url": "https://boards.greenhouse.io/exampleco/jobs/4400001001",
+      "location": {"name": "London, UK; Melbourne, AUS; Remote-Friendly, Australia"},
+      "offices": [{"id": 71001, "name": "Melbourne", "location": "Melbourne, Australia"}],
+      "metadata": [
+        {"id": 900001, "name": "Location Type", "value": "Remote", "value_type": "single_select"}
+      ],
+      "content": "&lt;p&gt;Deploy &amp;amp; embed LLM systems with enterprise customers across APAC.&lt;/p&gt;"
+    },
+    {
+      "id": 4400001002,
+      "internal_job_id": 2600002,
+      "title": "Applied AI Engineer",
+      "updated_at": "2026-08-01T00:00:00Z",
+      "first_published": null,
+      "requisition_id": "R-1043",
+      "absolute_url": "https://boards.greenhouse.io/exampleco/jobs/4400001002",
+      "location": {"name": null},
+      "offices": [{"id": 71001, "name": "Melbourne"}, {"id": 71002, "name": "Remote"}],
+      "metadata": [],
+      "content": ""
+    },
+    {
+      "id": 4400001003,
+      "internal_job_id": 2600003,
+      "title": "Senior Accountant",
+      "updated_at": "2026-06-15T00:00:00Z",
+      "first_published": "2026-06-15T00:00:00Z",
+      "requisition_id": "R-1044",
+      "absolute_url": "https://boards.greenhouse.io/exampleco/jobs/4400001003",
+      "location": {"name": "New York, NY"},
+      "metadata": [],
+      "content": "&lt;p&gt;Ledger work.&lt;/p&gt;"
+    }
+  ],
+  "meta": {"total": 3}
+}

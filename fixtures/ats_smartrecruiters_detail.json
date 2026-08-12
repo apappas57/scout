@@ -1,0 +1,22 @@
+{
+  "id": "744000059000001",
+  "name": "Implementation Engineer",
+  "postingUrl": "https://jobs.smartrecruiters.com/ExampleCo/744000059000001-implementation-engineer",
+  "applyUrl": "https://jobs.smartrecruiters.com/ExampleCo/744000059000001-implementation-engineer?oga=true",
+  "jobAd": {
+    "sections": {
+      "companyDescription": {
+        "title": "Company Description",
+        "text": "<p>Boilerplate identical on every posting.</p>"
+      },
+      "jobDescription": {
+        "title": "Job Description",
+        "text": "<p>Guide customers through rollout &amp; go-live.</p>"
+      },
+      "qualifications": {
+        "title": "Qualifications",
+        "text": "<p>5+ years in delivery or solutions roles.</p>"
+      }
+    }
+  }
+}

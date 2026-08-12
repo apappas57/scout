@@ -1,0 +1,29 @@
+[
+  {
+    "id": "a1b2c3d4-0000-4000-8000-000000000001",
+    "text": "Solutions Engineer, APAC",
+    "createdAt": 1700000000000,
+    "hostedUrl": "https://jobs.lever.co/exampleco/a1b2c3d4-0000-4000-8000-000000000001",
+    "applyUrl": "https://jobs.lever.co/exampleco/a1b2c3d4-0000-4000-8000-000000000001/apply",
+    "categories": {
+      "commitment": "Full-time",
+      "location": "Melbourne",
+      "allLocations": ["Melbourne", "Remote - Australia"],
+      "team": "Field Engineering"
+    },
+    "country": "AU",
+    "workplaceType": "remote",
+    "descriptionPlain": "Partner with enterprise customers   to deploy the platform &amp; prove value."
+  },
+  {
+    "id": "a1b2c3d4-0000-4000-8000-000000000002",
+    "text": "Account Executive",
+    "createdAt": 1700000000000,
+    "hostedUrl": "https://jobs.lever.co/exampleco/a1b2c3d4-0000-4000-8000-000000000002",
+    "applyUrl": "https://jobs.lever.co/exampleco/a1b2c3d4-0000-4000-8000-000000000002/apply",
+    "categories": {"commitment": "Full-time", "location": "Sydney"},
+    "country": "AU",
+    "workplaceType": "onsite",
+    "descriptionPlain": "Own the full sales cycle."
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "totalFound": 3,
+  "offset": 0,
+  "limit": 100,
+  "content": [
+    {
+      "id": "744000059000001",
+      "name": "Implementation Engineer",
+      "uuid": "00000000-0000-4000-8000-000000000001",
+      "releasedDate": "2026-08-01T04:10:00.000Z",
+      "location": {
+        "city": "Beijing",
+        "region": "",
+        "country": "cn",
+        "fullLocation": "Beijing, , China",
+        "remote": false,
+        "hybrid": true
+      },
+      "industry": {"id": "software", "label": "Software"},
+      "department": {"id": "0", "label": "Delivery"}
+    },
+    {
+      "id": "744000059000002",
+      "name": "Customer Engineer",
+      "uuid": "00000000-0000-4000-8000-000000000002",
+      "releasedDate": "2026-07-15T00:00:00.000Z",
+      "location": {
+        "city": "Melbourne",
+        "region": "VIC",
+        "country": "au",
+        "remote": true,
+        "hybrid": false
+      },
+      "industry": {"id": "software", "label": "Software"},
+      "department": {"id": "0", "label": "Delivery"}
+    },
+    {
+      "id": "744000059000003",
+      "name": "Payroll Officer",
+      "uuid": "00000000-0000-4000-8000-000000000003",
+      "releasedDate": "2026-07-01T00:00:00.000Z",
+      "location": {
+        "city": "Warsaw",
+        "region": "",
+        "country": "pl",
+        "fullLocation": "Warsaw, Poland",
+        "remote": false,
+        "hybrid": false
+      },
+      "industry": {"id": "software", "label": "Software"},
+      "department": {"id": "1", "label": "Finance"}
+    }
+  ]
+}
