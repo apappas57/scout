@@ -40,6 +40,10 @@ class Role:
     location: str
     source: str = ""
     snippet: str = ""
+    workplace: str = ""            # the board's own arrangement field (workplaceType,
+                                   # Location Type, remote/hybrid flags), never a place
+    description: str = ""          # full posting body, unabridged: the remote gate
+                                   # reads it, so truncating it deletes the signal
     score: Score | None = None
     score_reason: str = ""
     status: str = "new"            # new|shortlisted|applied|interview|rejected|offer|dropped

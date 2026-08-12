@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS roles (
     location TEXT,
     source TEXT,
     snippet TEXT,
+    workplace TEXT,
+    description TEXT,
     score TEXT,
     score_reason TEXT,
     status TEXT NOT NULL DEFAULT 'new',
@@ -45,6 +47,13 @@ CREATE INDEX IF NOT EXISTS idx_audit_run ON audit(run_id);
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    # Columns added after v1. CREATE TABLE IF NOT EXISTS never upgrades an
+    # existing table, so a database created before these columns existed gets
+    # them added here. Idempotent: guarded by what the table actually has.
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(roles)")}
+    for column in ("workplace", "description"):
+        if column not in existing:
+            conn.execute(f"ALTER TABLE roles ADD COLUMN {column} TEXT")
     conn.commit()
 
 

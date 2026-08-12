@@ -107,6 +107,42 @@ _ALLOWED_CITY = re.compile(
 
 _REMOTE_TOKEN = r"(?:remote(?:[- ]?friendly|[- ]?first|[- ]?only)?|work from home|\bwfh\b|fully distributed)"
 
+# The board's structured arrangement field (Lever/Ashby workplaceType, Greenhouse
+# "Location Type", SmartRecruiters remote/hybrid flags). ats._make_role persists it
+# on Role.workplace and also writes it into the snippet lead ("Workplace: onsite."),
+# which is the only place it survived for rows stored before the field existed.
+_WORKPLACE_IN_SNIPPET = re.compile(r"\bWorkplace:\s*([^.]{1,60})\.", re.IGNORECASE)
+_WP_ONSITE = re.compile(r"\bon[- ]?site\b|\bin[- ]?(?:office|person)\b", re.IGNORECASE)
+_WP_HYBRID = re.compile(r"\bhybrid\b", re.IGNORECASE)
+_WP_REMOTE = re.compile(r"\bremote\b|\bwfh\b|work from home|\bdistributed\b", re.IGNORECASE)
+
+# Travel commitments stated as a share of working time. Quarterly travel is fine
+# under the remote-first requirement; a stated load at or above this share means
+# the role is a field role wearing a "Remote" location string (Talkdesk's APAC
+# Solution Engineer: location "Remote", body "travel approximately 35-70%").
+_TRAVEL_BLOCK_PCT = 25
+_TRAVEL_RANGE = r"(\d{1,3})\s*%?\s*(?:[-–]|to)\s*(\d{1,3})\s*%|(\d{1,3})\s*%"
+# Commas are excluded from the connector on both sides so "100% remote, some
+# travel" never reads as a 100% travel load: the clause has to be one breath.
+_TRAVEL_NEAR = re.compile(
+    rf"\btravel\w*[^.;,%]{{0,40}}?(?:{_TRAVEL_RANGE})|(?:{_TRAVEL_RANGE})[^.;,%]{{0,40}}?\btravel",
+    re.IGNORECASE,
+)
+
+
+def _workplace_label(role: Role) -> str:
+    """The board's own arrangement claim for this role, or "".
+
+    Role.workplace is authoritative. The snippet lead is the fallback for roles
+    persisted before the workplace column existed, so the fix reaches the rows
+    already sitting in scout.db.
+    """
+    label = (getattr(role, "workplace", "") or "").strip()
+    if label:
+        return label
+    m = _WORKPLACE_IN_SNIPPET.search(getattr(role, "snippet", "") or "")
+    return m.group(1).strip() if m else ""
+
 # The bracketed or dash-delimited qualifier that follows "Remote" in a location field:
 # "Remote (South Africa)", "Remote - Brussels", "Remote-Friendly (Travel-Required)".
 _REMOTE_QUALIFIER = re.compile(
@@ -263,7 +299,8 @@ def assess_remote(
     requirements.
 
     Args:
-        role: the candidate. Only ``location`` and ``snippet`` are read.
+        role: the candidate. ``workplace`` (the board's arrangement field, scored
+            ahead of the location string), ``location`` and ``snippet`` are read.
         filters: the ``[filters]`` config block.
         description: the full posting body. Falls back to ``role.description`` when an
             upstream ATS stage attached one, then to the snippet. Without a body the
@@ -286,6 +323,26 @@ def assess_remote(
     # the reason so Alex reads the strongest evidence first.
     blocks: list[tuple[int, str]] = []
     caveats: list[str] = []
+
+    # Rule 0a: the board's own arrangement field, scored ahead of the location
+    # string. This is structured data the company set (workplaceType, Location
+    # Type), not prose to be parsed, so it outranks any location: Lyrebird's
+    # Forward Deployed Engineer read "Melbourne", an allowed city, while its Lever
+    # workplaceType said onsite. Onsite and hybrid both fail the remote-first hard
+    # requirement. A self-contradictory label (Ashby's "Hybrid, remote-flagged")
+    # is a caveat, not a block, because the board is disagreeing with itself. The
+    # location-string rules below remain the fallback for postings whose board set
+    # no arrangement field at all.
+    workplace = _workplace_label(role)
+    if workplace:
+        if _WP_ONSITE.search(workplace):
+            blocks.append((0, f"the board's own arrangement field says onsite: {workplace!r}"))
+        elif _WP_HYBRID.search(workplace) and not _WP_REMOTE.search(workplace):
+            blocks.append((0, f"the board's own arrangement field says hybrid: {workplace!r}"))
+        elif _WP_HYBRID.search(workplace):
+            caveats.append(f"arrangement field disagrees with itself ({workplace!r}): remote-flagged but hybrid")
+        elif _WP_REMOTE.search(workplace):
+            evidence.append(f"the board's own arrangement field says remote: {workplace!r}")
 
     # Rule 0: the existing substring filter. Its failures are high-confidence, with one
     # exception worth carving out. A posting listing two cities ("Sydney, Melbourne",
@@ -375,6 +432,22 @@ def assess_remote(
                 blocks.append((0, f"onsite requirement tied to {', '.join(near)}: \"{_excerpt(hay, m)}\""))
             else:
                 caveats.append(f"onsite or hybrid expectation in the {where}: \"{_excerpt(hay, m)}\"")
+            break
+
+    # Rule 3b: travel load stated as a share of working time. Living in the body
+    # text past the snippet cut is exactly how Talkdesk's "travel approximately
+    # 35-70% of the time" slipped through, which is why the gate reads the full
+    # description. At or above _TRAVEL_BLOCK_PCT the role is a field role, not a
+    # remote one; below that it is a caveat worth reading.
+    for where, hay in haystacks:
+        if not hay:
+            continue
+        for m in _TRAVEL_NEAR.finditer(hay):
+            pct = max(int(g) for g in m.groups() if g)
+            if pct >= _TRAVEL_BLOCK_PCT:
+                blocks.append((0, f"travel load of {pct}% stated in the {where}: \"{_excerpt(hay, m)}\""))
+            else:
+                caveats.append(f"travel load of {pct}% stated in the {where}: \"{_excerpt(hay, m)}\"")
             break
 
     # Rule 4: timezone. A foreign zone alone is a caveat; a foreign zone stated as a

@@ -37,6 +37,8 @@ def _row_to_role(row: sqlite3.Row) -> Role:
         location=row["location"] or "",
         source=(row["source"] if "source" in row.keys() else "") or "",
         snippet=(row["snippet"] if "snippet" in row.keys() else "") or "",
+        workplace=(row["workplace"] if "workplace" in row.keys() else "") or "",
+        description=(row["description"] if "description" in row.keys() else "") or "",
         score=_score_from_text(row["score"] if "score" in row.keys() else None),
         score_reason=(row["score_reason"] if "score_reason" in row.keys() else "") or "",
         status=row["status"],
@@ -52,15 +54,23 @@ def upsert_roles(conn: sqlite3.Connection, roles, *, now: str) -> None:
             """
             INSERT INTO roles (
                 id, company, title, url, location, source, snippet,
+                workplace, description,
                 score, score_reason, status, drafts_json,
                 first_seen_at, last_seen_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 last_seen_at = excluded.last_seen_at,
                 score = excluded.score,
                 score_reason = excluded.score_reason,
                 snippet = excluded.snippet,
+                -- A re-sight fetched without content (with_content=false, or a role
+                -- past the ats max_detail cap) arrives with empty workplace and
+                -- description. Keep the stored signal rather than erasing it: the
+                -- remote gate reads these fields, and #296 exists because a missing
+                -- body hid Talkdesk's travel clause.
+                workplace = COALESCE(NULLIF(excluded.workplace, ''), roles.workplace),
+                description = COALESCE(NULLIF(excluded.description, ''), roles.description),
                 drafts_json = excluded.drafts_json
             """,
             (
@@ -71,6 +81,8 @@ def upsert_roles(conn: sqlite3.Connection, roles, *, now: str) -> None:
                 role.location,
                 role.source,
                 role.snippet,
+                role.workplace,
+                role.description,
                 _score_to_text(role.score),
                 role.score_reason,
                 role.status,

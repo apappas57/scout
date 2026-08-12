@@ -207,11 +207,13 @@ def _merge_sources(*batches: list[Role]) -> list[Role]:
 def _descriptions(roles: list[Role]) -> dict[str, str]:
     """Map role id to whatever body text discovery captured.
 
-    The ATS stage packs the posting body into Role.snippet, which is exactly what the
-    remote gate needs to find residency and work-authorisation clauses. Passing it in
-    is the difference between gating on a location string and gating on the posting.
+    The ATS stage persists the full posting body on Role.description, which is
+    exactly what the remote gate needs to find residency, work-authorisation and
+    travel clauses. The 600-char snippet is only a fallback for roles that predate
+    the description field: Talkdesk's 35-70% travel clause sat past the snippet
+    cut, which is why truncated text must never shadow the full body.
     """
-    return {r.id: r.snippet for r in roles if r.snippet}
+    return {r.id: (r.description or r.snippet) for r in roles if r.description or r.snippet}
 
 
 def remote_gate(roles: list[Role], *, config: dict):

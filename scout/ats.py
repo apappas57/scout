@@ -270,6 +270,12 @@ def _make_role(
     Role contract changing and without any downstream stage being touched. The
     date is also written into the snippet so it survives the trip through
     SQLite, which only persists the declared fields.
+
+    ``workplace`` and ``description`` are declared Role fields and are persisted
+    whole. The remote gate scores the board's own arrangement field ahead of the
+    location string (Lyrebird's FDE read "Melbourne" while workplaceType said
+    onsite), and it reads the full body for clauses like "35-70% travel" that a
+    truncated snippet cuts off (Talkdesk's APAC SE, cut at 600 chars).
     """
     role = Role(
         company=company,
@@ -278,6 +284,8 @@ def _make_role(
         location=location,
         source=f"ats:{board}",
         snippet=_compose_snippet(posted=posted, workplace=workplace, body=body),
+        workplace=workplace,
+        description=body,
     )
     role.posted_at = posted  # type: ignore[attr-defined]
     return role

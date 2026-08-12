@@ -21,7 +21,14 @@ heartbeat = "state/heartbeat"
 
 [search]
 target_companies = ["Anthropic", "OpenAI", "Glean", "Canva", "Cresta"]
-queries = ["forward deployed engineer", "applied ai engineer", "ai solutions engineer", "agent engineer", "llm engineer"]
+queries = ["forward deployed engineer", "applied ai engineer", "ai solutions engineer", "agent engineer", "llm engineer",
+  # Watch title families (board #308): remote is a hard filter via [filters]
+  # remote_only and the remote gate; the salary floor is written into each query
+  # because search terms are the only place Scout can express salary.
+  #   (1) AI & Automation Lead / AI Implementation / Automation Manager
+  #       (trade-operator shape, watch for maturation)
+  #   (2) AI Adoption / AI Enablement Lead (enterprise shape, already $180k+)
+  "ai & automation lead (remote, $150k+)", "ai implementation lead (remote, $150k+)", "automation manager ai (remote, $150k+)", "ai adoption lead (remote, $150k+)", "ai enablement lead (remote, $150k+)"]
 boards = ["greenhouse", "lever", "ashby", "smartrecruiters"]
 
 [signals]
@@ -32,7 +39,10 @@ allow_review = true       # keep roles whose posting is silent on remote eligibi
                           # false keeps only positively confirmed ones.
 
 [ats]
-title_keywords = ["forward deployed", "applied ai", "ai engineer", "solutions architect", "solutions engineer", "agent engineer", "llm engineer"]
+title_keywords = ["forward deployed", "applied ai", "ai engineer", "solutions architect", "solutions engineer", "agent engineer", "llm engineer",
+  # Watch title families (board #308). Matching is separator-insensitive, so
+  # "ai automation" also catches "AI & Automation Lead".
+  "ai automation", "automation lead", "automation manager", "ai implementation", "ai adoption", "ai enablement"]
 delay = 0.4          # seconds between board calls, to stay polite
 timeout = 20.0
 with_content = true  # fetch descriptions: the remote gate and score stage read them
@@ -65,7 +75,10 @@ exclude_keywords = ["unpaid", "internship"]
 
 [scoring]
 high_companies = []        # your highest-priority companies; set the real list in your private config
-high_keywords = ["forward deployed", "applied ai", "solutions architect"]
+high_keywords = ["forward deployed", "applied ai", "solutions architect",
+  # Watch title families (board #308): listed so they surface as at least MED in
+  # the digest (an unlisted title scores LOW and is never shown).
+  "automation lead", "automation manager", "ai implementation", "ai adoption", "ai enablement"]
 seniority_keywords = ["senior", "staff", "lead", "principal"]
 
 [notify]
